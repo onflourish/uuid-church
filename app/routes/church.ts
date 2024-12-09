@@ -42,7 +42,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
 
     if (!city || !state || !name) {
-        return new Response('City and state and church name are required search parameters', { status: 400 });
+        return new Response('Missing required parameters', { status: 400 });
     }
 
     // Generate embeddings for each search parameter
@@ -123,7 +123,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const chosenChurch = churches?.find((church: any) => church.id === chosenChurchId);
 
     const cleanedResponse = chosenChurch ? {
-        id: chosenChurch.id,
+        uuid: chosenChurch.id,
         name: chosenChurch.name,
         street: chosenChurch.street,
         city: chosenChurch.city,
@@ -131,7 +131,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
         zip: chosenChurch.zip,
         website: chosenChurch.website
     } : {
-        id: null,
+        uuid: null,
     }
 
     await supabaseAdmin.from('request').insert({
@@ -149,5 +149,9 @@ export async function loader({ request }: LoaderFunctionArgs) {
         }
     });
 
-    return Response.json({ ...cleanedResponse });
+    return new Response(JSON.stringify(cleanedResponse), {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
 }
